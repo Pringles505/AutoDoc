@@ -1,0 +1,6 @@
+{
+  "provider": "gemini",
+  "model": "gemini-2.0-flash",
+  "apiKey": "your-api-key-here",
+  "docFile": "./docs/doc.md"
+}
