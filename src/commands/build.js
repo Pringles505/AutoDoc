@@ -36,7 +36,7 @@ async function runBuild(options = {}) {
   if (!config.apiKey) {
     log.error('No API key found.');
     log.info(
-      `Set it in .autodocrc (apiKey) or via an environment variable (AUTODOC_API_KEY or provider-specific).`
+      `Set it in .autodocrc (apiKey), a .env file (AUTODOC_API_KEY or provider-specific), or export it in your shell.`
     );
     process.exit(1);
   }
