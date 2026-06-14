@@ -1,5 +1,21 @@
-function buildPrompt(currentDoc, diff) {
-  return `Update the documentation to reflect the code changes in the diff.
+function buildPrompt(currentDoc, diff, { changelog = false } = {}) {
+  const changelogField = changelog
+    ? `,
+  "changelogEntries": {
+    "added": ["<new features or capabilities added>"],
+    "changed": ["<existing behavior that changed>"],
+    "fixed": ["<bugs or issues fixed>"],
+    "removed": ["<features or behavior removed>"],
+    "deprecated": ["<features marked for future removal>"],
+    "security": ["<security-related fixes or improvements>"]
+  }`
+    : '';
+
+  const changelogInstruction = changelog
+    ? '\nAlso populate "changelogEntries" with human-readable bullet points describing the changes for each Keep-a-Changelog category. Only include categories that have actual entries — use empty arrays for the rest.'
+    : '';
+
+  return `Update the documentation to reflect the code changes in the diff.${changelogInstruction}
 
 Current documentation:
 ===
@@ -22,7 +38,7 @@ Return JSON only, no extra text:
       "reason": "<what changed and why the docs need to reflect it, e.g. 'config.port was renamed to config.serverPort'>"
     }
   ],
-  "updatedDoc": "<full updated markdown doc>"
+  "updatedDoc": "<full updated markdown doc>"${changelogField}
 }`;
 }
 

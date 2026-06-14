@@ -6,6 +6,7 @@ const { getConfig } = require('../config');
 const { getDiff, getStagedFiles, isGitRepo } = require('../git');
 const { getProvider } = require('../providers');
 const { log } = require('../ui');
+const { detectVersionBump, updateChangelog } = require('../changelog');
 
 async function runBuild(options = {}) {
   if (!isGitRepo()) {
@@ -73,9 +74,13 @@ async function runBuild(options = {}) {
   const provider = getProvider(config.provider);
   console.log(chalk.dim(`\n  Sending to ${config.provider} (${config.model})...\n`));
 
+  const changelogEnabled = !!config.changelog;
+
   let result;
   try {
-    result = await provider.analyze(config.apiKey, config.model, currentDoc, diff);
+    result = await provider.analyze(config.apiKey, config.model, currentDoc, diff, {
+      changelog: changelogEnabled,
+    });
   } catch (err) {
     log.error(`AI analysis failed: ${err.message}`);
     process.exit(1);
@@ -127,9 +132,31 @@ async function runBuild(options = {}) {
   fs.writeFileSync(docFilePath, result.updatedDoc);
   log.success(`Updated ${options.doc || config.docFile}`);
 
+  // Write changelog if enabled and AI returned entries
+  if (changelogEnabled && result.changelogEntries) {
+    const changelogFile = config.changelogFile || './CHANGELOG.md';
+    const changelogPath = path.resolve(process.cwd(), changelogFile);
+    const versionBump = detectVersionBump(diff);
+
+    try {
+      updateChangelog(changelogPath, result.changelogEntries, versionBump);
+      if (versionBump) {
+        log.success(
+          `Changelog updated → ${changelogFile} (version ${versionBump.oldVersion} → ${versionBump.newVersion})`
+        );
+      } else {
+        log.success(`Changelog updated → ${changelogFile}`);
+      }
+    } catch (err) {
+      log.warn(`Changelog update failed: ${err.message}`);
+    }
+  }
+
   const docRelative = options.doc || config.docFile;
+  const changelogRelative = changelogEnabled ? config.changelogFile || './CHANGELOG.md' : null;
+  const filesToAdd = [docRelative, changelogRelative].filter(Boolean).join(' ');
   console.log(chalk.dim('\n  Next: commit your changes including the updated doc.'));
-  console.log(chalk.dim(`  git add ${docRelative} && git commit -m "docs: update documentation"\n`));
+  console.log(chalk.dim(`  git add ${filesToAdd} && git commit -m "docs: update documentation"\n`));
 }
 
 module.exports = { runBuild };

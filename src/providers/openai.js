@@ -2,7 +2,7 @@ const { buildPrompt, parseResponse } = require('./common');
 
 const DEFAULT_MODEL = 'gpt-4o-mini';
 
-async function analyze(apiKey, model, currentDoc, diff) {
+async function analyze(apiKey, model, currentDoc, diff, options = {}) {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -11,7 +11,7 @@ async function analyze(apiKey, model, currentDoc, diff) {
     },
     body: JSON.stringify({
       model,
-      messages: [{ role: 'user', content: buildPrompt(currentDoc, diff) }],
+      messages: [{ role: 'user', content: buildPrompt(currentDoc, diff, options) }],
       temperature: 0.1,
       response_format: { type: 'json_object' },
     }),

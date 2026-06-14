@@ -2,7 +2,7 @@ const { buildPrompt, parseResponse } = require('./common');
 
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
 
-async function analyze(apiKey, model, currentDoc, diff) {
+async function analyze(apiKey, model, currentDoc, diff, options = {}) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -13,7 +13,7 @@ async function analyze(apiKey, model, currentDoc, diff) {
     body: JSON.stringify({
       model,
       max_tokens: 8192,
-      messages: [{ role: 'user', content: buildPrompt(currentDoc, diff) }],
+      messages: [{ role: 'user', content: buildPrompt(currentDoc, diff, options) }],
     }),
   });
 

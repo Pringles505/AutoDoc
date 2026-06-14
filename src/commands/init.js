@@ -61,13 +61,32 @@ async function runInit() {
       default: true,
       when: (a) => !fs.existsSync(path.resolve(process.cwd(), a.docFile)),
     },
+    {
+      type: 'confirm',
+      name: 'changelog',
+      message: 'Enable changelog generation? (updates CHANGELOG.md on every build)',
+      default: true,
+    },
+    {
+      type: 'input',
+      name: 'changelogFile',
+      message: 'Path to changelog file:',
+      default: './CHANGELOG.md',
+      when: (a) => a.changelog,
+      validate: (v) => (v.trim() ? true : 'Path is required'),
+    },
   ]);
 
   const config = {
     provider: answers.provider,
     model: answers.model,
     docFile: answers.docFile,
+    changelog: answers.changelog,
   };
+
+  if (answers.changelog && answers.changelogFile) {
+    config.changelogFile = answers.changelogFile;
+  }
 
   if (answers.apiKey) {
     config.apiKey = answers.apiKey;
@@ -131,7 +150,13 @@ async function runInit() {
   console.log(chalk.dim('  1. Make your code changes'));
   console.log(chalk.dim('  2. Stage them with: git add .'));
   console.log(chalk.dim('  3. Run: autodoc build'));
-  console.log(chalk.dim('  4. Approve the doc changes, then commit & push\n'));
+  if (answers.changelog) {
+    console.log(chalk.dim('  4. Approve the doc changes — doc + changelog will both be updated'));
+    console.log(chalk.dim('  5. Bump version in package.json to create a versioned changelog entry'));
+    console.log(chalk.dim('  6. Commit & push\n'));
+  } else {
+    console.log(chalk.dim('  4. Approve the doc changes, then commit & push\n'));
+  }
 }
 
 function getEnvKey(provider) {

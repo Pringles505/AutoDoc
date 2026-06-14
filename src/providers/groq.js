@@ -2,7 +2,7 @@ const { buildPrompt, parseResponse } = require('./common');
 
 const DEFAULT_MODEL = 'llama-3.1-8b-instant';
 
-async function analyze(apiKey, model, currentDoc, diff) {
+async function analyze(apiKey, model, currentDoc, diff, options = {}) {
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -11,7 +11,7 @@ async function analyze(apiKey, model, currentDoc, diff) {
     },
     body: JSON.stringify({
       model,
-      messages: [{ role: 'user', content: buildPrompt(currentDoc, diff) }],
+      messages: [{ role: 'user', content: buildPrompt(currentDoc, diff, options) }],
       temperature: 0.1,
     }),
   });

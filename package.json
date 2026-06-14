@@ -1,14 +1,15 @@
 {
-  "name": "autodoc",
-  "version": "1.0.0",
+  "name": "@mascaro101/autodoc",
+  "version": "1.0.1",
   "description": "Auto-generate and maintain documentation from git diffs using AI",
   "license": "MIT",
   "bin": {
-    "autodoc": "./bin/autodoc.js"
+    "autodoc": "bin/autodoc.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
+  "files": ["bin/", "src/"],
   "keywords": ["documentation", "ai", "git", "cli", "automation"],
   "dependencies": {
     "chalk": "^4.1.2",
